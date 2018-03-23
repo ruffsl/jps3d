@@ -7,10 +7,13 @@
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 
+#include <iostream>
+#include <fstream>
+
 using namespace JPS;
 
 int main(int argc, char ** argv){
-  if(argc != 2) {
+  if(argc < 2) {
     printf(ANSI_COLOR_RED "Input yaml required!\n" ANSI_COLOR_RESET);
     return -1;
   }
@@ -106,8 +109,13 @@ int main(int argc, char ** argv){
   if(valid_jps) {
     vec_Vec2f path = planner_jps->getRawPath();
     boost::geometry::model::linestring<point_2d> line;
-    for(auto pt: path) 
+    std::ofstream path_jps_file;
+    path_jps_file.open(argv[2] + std::string("path_jps.csv"));
+    for(auto pt: path){
       line.push_back(point_2d(pt(0), pt(1)));
+      path_jps_file << pt(0) << ',' << pt(1) << '\n';
+    }
+    path_jps_file.close();
     mapper.add(line);
     mapper.map(line, "opacity:0.4;fill:none;stroke:rgb(212,0,0);stroke-width:5"); // Red
   }
@@ -116,11 +124,23 @@ int main(int argc, char ** argv){
   if(valid_astar) {
     vec_Vec2f path = planner_astar->getRawPath();
     boost::geometry::model::linestring<point_2d> line;
-    for(auto pt: path) 
+    std::ofstream path_astar_file;
+    path_astar_file.open(argv[2] + std::string("path_astar.csv"));
+    for(auto pt: path){
       line.push_back(point_2d(pt(0), pt(1)));
+      path_astar_file << pt(0) << ',' << pt(1) << '\n';
+    }
+    path_astar_file.close();
     mapper.add(line);
     mapper.map(line, "opacity:0.4;fill:none;stroke:rgb(1,212,0);stroke-width:5"); // Green
   }
+
+//  printf("JPS Path:\n");
+//  vec_Vec2f path_jps = planner_jps->getRawPath();
+//  vec_Vec2f path_astar = planner_astar->getRawPath();
+//  for(auto const& value: planner_jps->getRawPath()) {
+//      printf("%f, %f\n", value(0), value(1));
+//  }
 
 
   return 0;
